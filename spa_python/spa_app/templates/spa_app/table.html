@@ -1,0 +1,32 @@
+{% extends 'spa_app/base.html' %}
+
+{% block title %}Table{% endblock title %}
+
+{% block content %}
+
+<form method="get" align="center" id="form">
+    {% csrf_token %}
+    {{ table_form }}
+    <input type = "submit" value = "Submit">
+</form>
+
+<table id="table">
+    {% comment %} <td class="title_table">ID</td> {% endcomment %}
+    <td class="title_table">DATE</td>
+    <td class="title_table">NAME</td>
+    <td class="title_table">AMOUNT</td>
+    <td class="title_table">DISTANCE</td>
+    {% for i in table %}
+    <tr class='success'>
+        {% comment %} <td>{{ i.id }}</td> {% endcomment %}
+        <td>{{ i.date }}</td>
+        <td>{{ i.name }}</td>
+        <td>{{ i.amount }}</td>
+        <td>{{ i.distance }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+{% endblock content %}
