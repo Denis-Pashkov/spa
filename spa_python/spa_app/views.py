@@ -22,7 +22,7 @@ class Table_view(ListView):
         response = super().dispatch(request, *args, **kwargs)
 
         def clean_filter_text_to_sort():
-            if (user_form.data['find_text'] == '' and user_form.data['filter_condition'] == '-') or (user_form.data['find_text'] == '' and user_form.data['filter_condition'] != '-'):
+            if (user_form.data['find_text'] == ''):
                 return True
 
         def clean_all():
