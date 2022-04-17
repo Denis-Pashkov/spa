@@ -23,51 +23,12 @@ from .forms import table_form
 
 # Create your views here.
 
-# class Table(ListView):
-#     model = Reviews
-#     context_object_name = 'reviewes_list'
-#     try:
-#         queryset = Reviews.objects.order_by('-date')[:15]
-#     except:
-#         paginate_by = 15
-#     template_name = 'home/in_menu/about/reviews.html'
-
-
-def table(request):
-    return render(request, 'spa_app/table.html')
-
 
 class Table_view(ListView):
-    # if request.is_ajax and request.method
-    # def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-    # if request.is_ajax:
-    #     table = Table.objects.all()[:5].values_list
-    #     ser_instance = serializers.serialize('json', [ table, ])
-    #     # send to client side.
-    #     return JsonResponse({"instance": ser_instance}, status=200)
-    # return super().get(request, *args, **kwargs)
     model = Table
     template_name = 'spa_app/table.html'
     context_object_name = 'table'
     paginate_by = 5
-
-    # for i in range(1, 501):
-
-    #     def set_name():
-    #         lst = list('abcdefghigklmnopqrstuvyxwz')
-    #         name = ''
-    #         for i in range(0, 6):
-    #             name += str(random.choice(lst))
-    #             if i == 0:
-    #                 name = name.upper()
-    #         return name
-
-    #     def rd_asd():
-    #         rd = float(str(random.randint(1, 4000)) + '.' + str(random.randint(1, 999)))
-    #         return rd
-
-    #     new_s1 = Table(name=set_name(), amount=rd_asd(), distance=rd_asd())
-    #     new_s1.save()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -97,7 +58,6 @@ class Table_view(ListView):
                 return True
 
         if request.is_ajax():
-
             user_form = table_form(request.GET)
             quer = ''
             if user_form.data['column'] != '-':
@@ -124,8 +84,12 @@ class Table_view(ListView):
                             # raise TypeError('Значение должно быть числом или числом с плавающей точкой')
                         quer = Table.objects.raw(
                             f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} {user_form.data['filter_condition']} {user_form.data['find_text']} order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
+                    elif user_form.data['filter_condition'] != 'include' and user_form.data['column'] == 'name':
+                        err = {
+                            'OperationError': 'Operations [>, <, =] can only be applied to the fields AMOUNT and DISTANCE'}
+                        return JsonResponse({"errors": json.dumps(err)}, status=400)
+                        # raise TypeError('Операции [>, <, =] могут быть применены только к полям AMOUNT и DISTANCE')
                     elif user_form.data['filter_condition'] == 'include':
-                        # cl = user_form.data['column']
                         ft = user_form.data['find_text']
                         if user_form.data['column'] == 'name':
                             quer = Table.objects.filter(name__icontains=f'{ft}').order_by(
@@ -136,46 +100,11 @@ class Table_view(ListView):
                         elif user_form.data['column'] == 'distance':
                             quer = Table.objects.filter(distance__icontains=f'{ft}').order_by(
                                 user_form.data['column'])[:int(user_form.data['paginate_field'])]
-
-                table_response = serializers.serialize(
-                    'json', quer, fields={'date', 'name', 'amount', 'distance'})
-                return JsonResponse({'success': table_response}, status=200)
             else:
                 quer = Table.objects.all()[:int(
                     user_form.data['paginate_field'])]
-                table_response = serializers.serialize(
-                    'json', quer, fields={'date', 'name', 'amount', 'distance'})
-                return JsonResponse({'success': table_response}, status=200)
+            table_response = serializers.serialize(
+                'json', quer, fields={'date', 'name', 'amount', 'distance'})
+            return JsonResponse({'success': table_response}, status=200)
         else:
             return response
-
-
-class TableApiView(APIView):
-    def get(self, request):
-        lst = Table.objects.all()[:5].values_list()
-        if request.is_ajax():
-            # table = {'table': Response({'get': lst})}
-            # return render(request, 'spa_app/table.html', table)
-
-            table = serializers.serialize(
-                'json',
-                Table.objects.all()[:5],
-                fields=('id', 'date', 'name', 'amount', 'distance')
-            )
-            # Возвращать простым Response, также возвращается JSON
-            return JsonResponse({'table': table}, status=200)
-
-            # return JsonResponse({'success': True}, status=201)
-        else:
-            return Response({'get': lst})
-
-    def post(self, request):
-        post_new = Table(
-            name=request.data['name'], amount=request.data['amount'], distance=request.data['distance'])
-        post_new.save()
-        return Response({'post': model_to_dict(post_new)})
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['now'] = timezone.now()
-    #     return context

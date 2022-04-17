@@ -5,20 +5,18 @@
 {% block content %}
 
 <form method="get" align="center" id="form">
-    {% comment %} {% csrf_token %} {% endcomment %}
+    {% csrf_token %}
     {{ table_form }}
     <input type = "submit" value = "Submit">
 </form>
 
 <table id="table">
-    {% comment %} <td class="title_table">ID</td> {% endcomment %}
     <td class="title_table">DATE</td>
     <td class="title_table">NAME</td>
     <td class="title_table">AMOUNT</td>
     <td class="title_table">DISTANCE</td>
     {% for i in table %}
     <tr class='success'>
-        {% comment %} <td>{{ i.id }}</td> {% endcomment %}
         <td>{{ i.date }}</td>
         <td>{{ i.name }}</td>
         <td>{{ i.amount }}</td>
@@ -28,8 +26,4 @@
 
 </table>
 
-
-<div id="err_div">
-    <p id="err_p"></p>
-</div>
 {% endblock content %}

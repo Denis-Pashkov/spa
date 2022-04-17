@@ -28,7 +28,6 @@ class table_form(forms.Form):
         ('50', '50'),
         ('100', '100'),
         ('200', '200'),
-        ('all', 'all'),
     )
     column = forms.ChoiceField(choices=column_choices)
     filter_condition = forms.ChoiceField(choices=filter_choices)
