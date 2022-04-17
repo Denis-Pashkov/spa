@@ -32,7 +32,3 @@ c  fc ft
 Таблица БД PostgreSQL, в формате CSV, лежит в каталоге other_data/postgresql_table.
 
 Скриншоты можно посмотреть в каталоге other_data/screenshots.
-
-Инструкция для запуска и локального тестирования other_data/screenshots.
-
-Демонстрация работы приложения на Youtube URL:.
