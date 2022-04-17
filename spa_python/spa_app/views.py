@@ -1,27 +1,10 @@
-from distutils.log import error
 import json
-from mailbox import MaildirMessage
-import random
-from turtle import distance
 from typing import Any
-from unicodedata import name
-from urllib import response
-from attr import fields
-from django.forms import model_to_dict
-from django.views.generic.list import ListView
-from django.shortcuts import redirect, render
-from requests import request
-from rest_framework.response import Response
-from django.http import HttpRequest, HttpResponse, JsonResponse
-from .serializers import TableSerializer
-from . import models
-from spa_app.models import Table
-from django.core import serializers
-from rest_framework import generics
-from rest_framework.views import APIView
+from .models import Table
 from .forms import table_form
-
-# Create your views here.
+from django.core import serializers
+from django.views.generic.list import ListView
+from django.http import HttpRequest, JsonResponse
 
 
 class Table_view(ListView):

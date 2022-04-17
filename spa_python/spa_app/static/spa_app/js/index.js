@@ -26,7 +26,6 @@ $(document).ready(function ($) {
                     body.append(table);
                 }
                 reset_table()
-                // document.getElementById("form").reset();
                 console.log(json)
                 var instance = JSON.parse(json["success"]);
                 let fields = ''

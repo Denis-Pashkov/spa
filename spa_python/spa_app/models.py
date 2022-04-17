@@ -6,7 +6,3 @@ class Table(models.Model):
     name = models.CharField('Название', max_length=20)
     amount = models.FloatField('Количество', max_length=20)
     distance = models.FloatField('Расстояние', max_length=20)
-
-    # def __str__(self):
-    #     return(self.date)
-
