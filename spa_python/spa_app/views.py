@@ -1,5 +1,7 @@
 import random
+from turtle import distance
 from typing import Any
+from unicodedata import name
 from urllib import response
 from attr import fields
 from django.forms import model_to_dict
@@ -44,16 +46,24 @@ class Table_view(ListView):
     model = Table
     template_name = 'spa_app/table.html'
     context_object_name = 'table'
-    print('is ok')
     paginate_by = 5
 
     # for i in range(1, 501):
+
+    #     def set_name():
+    #         lst = list('abcdefghigklmnopqrstuvyxwz')
+    #         name = ''
+    #         for i in range(0, 6):
+    #             name += str(random.choice(lst))
+    #             if i == 0:
+    #                 name = name.upper()
+    #         return name
 
     #     def rd_asd():
     #         rd = float(str(random.randint(1, 4000)) + '.' + str(random.randint(1, 999)))
     #         return rd
 
-    #     new_s1 = Table(name=f'Name{i}', amount=rd_asd(), distance=rd_asd())
+    #     new_s1 = Table(name=set_name(), amount=rd_asd(), distance=rd_asd())
     #     new_s1.save()
 
     def get_context_data(self, **kwargs):
@@ -63,29 +73,77 @@ class Table_view(ListView):
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any):
         response = super().dispatch(request, *args, **kwargs)
+
+        def clean_filter_text_to_sort():
+            if (user_form.data['find_text'] == '' and user_form.data['filter_condition'] == '-') or (user_form.data['find_text'] == '' and user_form.data['filter_condition'] != '-'):
+                return True
+
+        def clean_all():
+            if user_form.data['find_text'] != '' and user_form.data['filter_condition'] != '-':
+                return True
+
+        def isfloat(a):
+            try:
+                z = float(a)
+                return True
+            except:
+                return False
+
+        def eq():
+            if user_form.data['filter_condition'] == '-' and user_form.data['find_text'] != '':
+                return True
+
         if request.is_ajax():
-            print('--------------asd')
+
             user_form = table_form(request.GET)
-            # print(user_form.data['column'], user_form.data['filter_condition'], user_form.data['paginate_field'],
-            #       user_form.data['find_text'], sep='\n')
-            table_response = serializers.serialize('json', Table.objects.all()[:int(user_form.data['paginate_field'])], fields={
-                                                   'id', 'date', 'name', 'amount', 'distance'})
-            # print(Table.objects.all()[:5].values)
-            return JsonResponse({'success': table_response}, status=200)
+            quer = ''
+            if user_form.data['column'] != '-':
+                if clean_filter_text_to_sort():
+                    quer = Table.objects.order_by(
+                        f"{user_form.data['column']}")[:int(user_form.data['paginate_field'])]
+
+                if eq() and quer == '':
+                    if user_form.data['column'] != 'name' and not isfloat(user_form.data['find_text']):
+                        raise TypeError(
+                            'Значение должно быть числом или числом с плавающей точкой')
+                    else:
+                        quer = Table.objects.raw(
+                            f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} = '{user_form.data['find_text']}' order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
+
+                if clean_all() and quer == '':
+                    if user_form.data['filter_condition'] != 'include' and user_form.data['column'] != 'name':
+                        if not isfloat(user_form.data['find_text']):
+                            raise TypeError('Значение должно быть числом или числом с плавающей точкой')
+                        quer = Table.objects.raw(
+                            f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} {user_form.data['filter_condition']} {user_form.data['find_text']} order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
+                    elif user_form.data['filter_condition'] == 'include':
+                        # cl = user_form.data['column']
+                        ft = user_form.data['find_text']
+                        if user_form.data['column'] == 'name':
+                            quer = Table.objects.filter(name__icontains=f'{ft}').order_by(
+                                user_form.data['column'])[:int(user_form.data['paginate_field'])]
+                        elif user_form.data['column'] == 'amount':
+                            quer = Table.objects.filter(amount__icontains=f'{ft}').order_by(
+                                user_form.data['column'])[:int(user_form.data['paginate_field'])]
+                        elif user_form.data['column'] == 'distance':
+                            quer = Table.objects.filter(distance__icontains=f'{ft}').order_by(
+                                user_form.data['column'])[:int(user_form.data['paginate_field'])]
+
+                # if user_form.data['column'] == 'name' and user_form.data['find_text'] != '' and quer == '':
+                #     quer = Table.objects.raw(
+                #         f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} = '{user_form.data['find_text']}' order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
+
+                table_response = serializers.serialize(
+                    'json', quer, fields={'id', 'date', 'name', 'amount', 'distance'})
+                return JsonResponse({'success': table_response}, status=200)
+            else:
+                quer = Table.objects.all()[:int(
+                    user_form.data['paginate_field'])]
+                table_response = serializers.serialize(
+                    'json', quer, fields={'date', 'name', 'amount', 'distance'})
+                return JsonResponse({'success': table_response}, status=200)
         else:
             return response
-
-    # def dispatch(request, *args, **kwargs):
-    #         response = super().dispatch(request, *args, **kwargs)
-            # if request.is_ajax():
-            #    return JsonResponse({'success': 1}, status=200)
-            # else:
-            #    return response
-
-
-# class TableApiView(generics.ListAPIView):
-#     queryset = Table.objects.all()
-#     serializer_class = TableSerializer
 
 
 class TableApiView(APIView):
@@ -103,7 +161,7 @@ class TableApiView(APIView):
             # Возвращать простым Response, также возвращается JSON
             return JsonResponse({'table': table}, status=200)
 
-            return JsonResponse({'success': True}, status=201)
+            # return JsonResponse({'success': True}, status=201)
         else:
             return Response({'get': lst})
 
@@ -117,28 +175,3 @@ class TableApiView(APIView):
     #     context = super().get_context_data(**kwargs)
     #     context['now'] = timezone.now()
     #     return context
-
-    # new_s1 = Table(name = 'Name1', amount = 122.3, distance = 11.431)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name2', amount = 33.3, distance = 654.787)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name3', amount = 112.3, distance = 34.673)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name4', amount = 123.3, distance = 89.874)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name5', amount = 435.3, distance = 56.455)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name6', amount = 1.3, distance = 44.345)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name7', amount = 44.3, distance = 66.234)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name8', amount = 23.3, distance = 22.235)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name9', amount = 534.3, distance = 123.242)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name10', amount = 12.3, distance = 423.651)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name11', amount = 330.3, distance = 30.764)
-    # new_s1.save()
-    # new_s1 = Table(name = 'Name12', amount = 3.3, distance = 33.234)
-    # new_s1.save()
