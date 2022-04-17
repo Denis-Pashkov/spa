@@ -143,14 +143,13 @@ $(document).ready(function ($) { //когда страница прогрузи�
             data: serializedData,
             success: function (json) {
                 function reset_table() {
+                    
                     let body = document.getElementById('body');
                     let table = document.getElementById('table');
-                    // body.removeChild(table);
 
                     while (table.firstChild) {
                         table.removeChild(table.firstChild);
                     }
-                    // <td class="title_table">DATE</td>
 
                     lst = ['DATE', 'NAME', 'AMOUNT', 'DISTANCE']
 
@@ -162,18 +161,6 @@ $(document).ready(function ($) { //когда страница прогрузи�
                         table.append(td_title);
 
                     }
-                    
-                    // tr = document.createElement('tr');
-                    // tr.setAttribute('class', 'success');
-                    // table.append(tr);
-                    // td_title = document.createElement('td');
-                    // td_title.setAttribute('class', 'title_table');
-
-
-                    // td = document.createElement('td');
-                    // new_table = document.createElement('table');
-                    // new_table.setAttribute('id', 'table');
-                    // new_table.append
                     body.append(table);
                 }
                 reset_table()
@@ -202,8 +189,8 @@ $(document).ready(function ($) { //когда страница прогрузи�
                     )
                 }
             },
-            error: function (xhr, errmsg, err) {
-                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            error: function (response) {
+                alert(response.responseJSON.errors);
             }
         });
     });

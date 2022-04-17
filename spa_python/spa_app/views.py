@@ -1,3 +1,6 @@
+from distutils.log import error
+import json
+from mailbox import MaildirMessage
 import random
 from turtle import distance
 from typing import Any
@@ -104,8 +107,10 @@ class Table_view(ListView):
 
                 if eq() and quer == '':
                     if user_form.data['column'] != 'name' and not isfloat(user_form.data['find_text']):
-                        raise TypeError(
-                            'Значение должно быть числом или числом с плавающей точкой')
+                        err = {
+                            'ValueError': 'The value must be a number or a float'}
+                        return JsonResponse({"errors": json.dumps(err)}, status=400)
+                        # raise TypeError('Значение должно быть числом или числом с плавающей точкой')
                     else:
                         quer = Table.objects.raw(
                             f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} = '{user_form.data['find_text']}' order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
@@ -113,7 +118,10 @@ class Table_view(ListView):
                 if clean_all() and quer == '':
                     if user_form.data['filter_condition'] != 'include' and user_form.data['column'] != 'name':
                         if not isfloat(user_form.data['find_text']):
-                            raise TypeError('Значение должно быть числом или числом с плавающей точкой')
+                            err = {
+                                'ValueError': 'The value must be a number or a float'}
+                            return JsonResponse({"errors": json.dumps(err)}, status=400)
+                            # raise TypeError('Значение должно быть числом или числом с плавающей точкой')
                         quer = Table.objects.raw(
                             f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} {user_form.data['filter_condition']} {user_form.data['find_text']} order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
                     elif user_form.data['filter_condition'] == 'include':
@@ -129,12 +137,8 @@ class Table_view(ListView):
                             quer = Table.objects.filter(distance__icontains=f'{ft}').order_by(
                                 user_form.data['column'])[:int(user_form.data['paginate_field'])]
 
-                # if user_form.data['column'] == 'name' and user_form.data['find_text'] != '' and quer == '':
-                #     quer = Table.objects.raw(
-                #         f"SELECT * FROM public.spa_app_table WHERE {user_form.data['column']} = '{user_form.data['find_text']}' order by {user_form.data['column']} limit {user_form.data['paginate_field']};")
-
                 table_response = serializers.serialize(
-                    'json', quer, fields={'id', 'date', 'name', 'amount', 'distance'})
+                    'json', quer, fields={'date', 'name', 'amount', 'distance'})
                 return JsonResponse({'success': table_response}, status=200)
             else:
                 quer = Table.objects.all()[:int(
