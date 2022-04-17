@@ -1,5 +1,3 @@
-from multiprocessing import Condition
-from random import choices
 from django import forms
 
 
@@ -12,7 +10,7 @@ class table_form(forms.Form):
         ('amount', 'AMOUNT'),
         ('distance', 'DISTANCE'),
     )
-    
+
     filter_choices = (
         ('-', '-'),
         ('=', '='),
@@ -33,4 +31,3 @@ class table_form(forms.Form):
     filter_condition = forms.ChoiceField(choices=filter_choices)
     paginate_field = forms.ChoiceField(choices=paginate)
     find_text = forms.CharField(max_length=20, required=False)
-    
