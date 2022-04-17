@@ -26,7 +26,7 @@ $(document).ready(function ($) {
                     body.append(table);
                 }
                 reset_table()
-                console.log(json)
+                // console.log(json)
                 var instance = JSON.parse(json["success"]);
                 let fields = ''
                 for (let index = 0; index < instance.length; index++) {
