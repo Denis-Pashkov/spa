@@ -3,6 +3,7 @@ from typing import Any
 from .models import Table
 from .forms import table_form
 from django.core import serializers
+from django.shortcuts import HttpResponse
 from django.views.generic.list import ListView
 from django.http import HttpRequest, JsonResponse
 
@@ -13,6 +14,8 @@ class Table_view(ListView):
     context_object_name = 'table'
     paginate_by = 5
 
+
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['table_form'] = table_form
@@ -27,8 +30,9 @@ class Table_view(ListView):
                 return True
             except:
                 return False
-
-        if request.is_ajax():
+        def is_ajax(request):
+            return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+        if is_ajax(request=request):
             user_form = table_form(request.GET)
             quer = ''
             if user_form.data['column'] != '-':
