@@ -32,3 +32,18 @@ c  fc ft
 Таблица БД PostgreSQL, в формате CSV, лежит в каталоге other_data/postgresql_table.
 
 Скриншоты можно посмотреть в каталоге other_data/screenshots.
+
+--- Развертывание ---
+* Создать БД и таблицу public.spa_app_table. Импортировать данные в таблицу: "spa\other_data\postgresql_table\spa_app_table".
+* В файле "spa\spa_python\spa_python\settings.py" применить соответствующие настройки БД в блоке:
+DATABASES = {
+   'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'db_for_spa',
+        'USER': 'postgres',
+        'PASSWORD': 'password'
+    }
+}.
+* В CMD перейти в "\spa\spa_python>".
+* Запустить сервер: python manage.py runserver.
+* Перейти http://127.0.0.1:8000.
